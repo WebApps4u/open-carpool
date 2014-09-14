@@ -1,5 +1,5 @@
-Open Car Pool
-=============
+Open CarPool
+============
 
 Web application for offering and requesting lifts by car to and from work.
 Open source project initiated by the eBay Green team. Based on a copy of the
