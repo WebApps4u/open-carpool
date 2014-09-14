@@ -1,0 +1,52 @@
+#!/usr/bin/env python
+
+"""
+(c) 2009 by Julian Rath
+The Skript for running call2ride json-rpc webservices.
+"""
+
+import ConfigParser
+import sys
+import logging.handlers
+
+import call2ride.simple_json_rpc
+import call2ride.sms_providers.sms_dummy
+import call2ride.sms_providers.sms_trade_de
+import call2ride.interface
+import call2ride.unix_daemon
+
+def main():
+    """
+    starts the server
+    """
+
+    # Read Configuration
+    cfgfile = sys.argv[1]
+    config = ConfigParser.ConfigParser()
+    config.readfp(open(cfgfile))
+	
+	# Logging
+    logfile = config.get('logging', 'file')
+    handler = logging.handlers.RotatingFileHandler(logfile, maxBytes=1024*1024*10, backupCount=5)
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    handler.setFormatter(formatter)
+    handler.setLevel(logging.DEBUG)
+    logging.getLogger('').setLevel(logging.DEBUG)
+    logging.getLogger('').addHandler(handler)
+	
+    # SMS Gateway
+    if config.get('main', 'type') == 'dev':
+      sms_provider = call2ride.sms_providers.sms_dummy.SmsGateway(config.get('sms', 'key'))
+    else:
+      sms_provider = call2ride.sms_providers.sms_trade_de.SmsGateway(config.get('sms', 'key'))
+    
+    # Start Server
+    server = call2ride.simple_json_rpc.SimpleJSONRPCServer(("localhost", config.getint('main', 'webservice_port')))
+    server.register_instance(call2ride.interface.Call2Ride(sms_provider, config))
+    #call2ride.unix_daemon.start_as_deamon(server.serve_forever, config.get('main', 'pidfile'), config.get('main', 'logfile'))
+    print 'Trying to start daemon'
+    call2ride.unix_daemon.start_as_deamon(server.serve_forever, config.get('main', 'pidfile'))
+    print 'Daemon was started'
+
+if __name__ == '__main__':
+    main()

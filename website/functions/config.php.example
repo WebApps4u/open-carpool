@@ -1,0 +1,80 @@
+<?php
+
+/*
+Open CarPool is a free and open source carpooling/dynamic ride sharing 
+system, open to be connected to other car pools and public transport.
+Copyright (C) 2009-2014  Oliver Pintat, Clemens Rath
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+In case this software interacts with other software tools, other 
+licenses may apply.
+*/
+
+/*******************************
+* CONFIG                       *
+*******************************/
+$_server_name = $_SERVER['SERVER_NAME'];
+
+/*
+$ocp_languages = array(
+    'de' => 'Deutsch',
+    'en' => 'English',
+    'fr' => 'Français',
+    'tr' => 'Türkçe',
+//    'da' => 'Dansk',
+//    'zh' => '&#20013;&#22269;&#30340;',
+);
+*/
+
+$ocp_languages = array('en' => '<img src="images/flag-en.gif"> English', 'tr' => '<img src="images/flag-tr.gif"> T&uuml;rk&#231;e', 'de' => '<img src="images/flag-de.gif"> Deutsch', 'dk' => '<img src="images/flag-dk.gif"> Dansk', 'fr' => '<img src="images/flag-fr.gif"> Fran&#231;ais', 'cn' => '<img src="images/flag_cn.png"> &#20013;&#22269;&#30340;');
+
+
+if ($_server_name == 'dev.opencarpool.org') {
+  /* Dev **************************************************/
+  // Base Url of Web-Applicaiton
+  define('OCP_BASE_URL', 'http://dev.opencarpool.org/');
+
+  // Timeout fpr Service Calls
+  define('OCP_TIMEOUT', 5);
+
+  // Databse Connection
+  define('OCP_CONNECTION_STRING', 'host=localhost dbname=opencarpool user=postgres password=postgres');
+
+  // Service Host
+  define('OCP_SERVICE_HOST', "localhost:8001");
+  
+  // SMS Fallback Key
+  define('OCP_SMS_FALLBACK', "123");
+  
+  // Zenback Fallback Key
+  define('OCP_ZENDESK_FALLBACK', "123");
+  
+  // Default location
+  define('OCP_DEFAULT_LOCATION_ID', "1");
+    
+  // Default company
+  define('OCP_DEFAULT_COMPANY_ID', "2");
+  
+  // User IDs Array, which are allowed to edit translations: array(1,2,3)
+  $ocp_allowed_user_for_translation = array(176,212,183);
+
+  // HTTPS
+  define('OCP_USE_HTTPS', false);
+  
+} else {
+  die('Fatal Error: No Configuration found!');
+}
+
+?>

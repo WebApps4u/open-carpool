@@ -1,0 +1,66 @@
+= Webservice Interface =
+
+== callerid_to_userid() ==
+Called CheckCallerIDRequest in clemens spec.
+This convert a callerid (eg 0712123123123, +49712123123123 or 
+0049712123123123) in a userid representation of the backend. 
+If the number is starting with only one 0 zero, germany(+49) is assumed.
+The user_id should be in string format,
+because the backend may use db-id's, uuid's or openid...
+
+=== request ===
+string[50] caller_id
+
+=== response ===
+string[100] user_id
+
+=== exceptions ===
+Callerid is not present in Database(ERR_NO_CALLER_ID);
+wrong format of callerid(ERR_VALUE);
+
+
+== request_ride() ==
+This function is for requesting a ride for a route. It starts the match process in the backend,
+this may work asynchronous as it doesn't return anything.
+
+=== request ===
+string[100] user_id
+integer[2] route_id
+integer[4]  earliest_start_time
+integer[4]  latest_start_time
+
+=== response ===
+None
+=== exceptions ===
+route_id do not exist(ERR_NO_ROUTE);
+wrong format of route_id or user_id(ERR_VALUE);
+Invalid starttime(ERR_INVALID_DATETIME);
+Userid is unknown(ERR_UNKNOWN_USER_ID);
+
+
+== offer_ride() ==
+As request ride, this may work asynchronous as it doesn't return anything.
+=== request ===
+string[100] user_id
+integer[2] route_id
+integer[4]  start_time
+
+=== response ===
+None
+
+=== exceptions ===
+route_id do not exist(ERR_NO_ROUTE);
+wrong format of route_id or user_id(ERR_VALUE);
+Invalid starttime(ERR_INVALID_DATETIME);
+Userid is unknown(ERR_UNKNOWN_USER_ID);
+
+
+== check_route_id() ==
+Check if a route with id 'xx' is existing.
+
+=== request ===
+integer[4] route_id
+
+=== response ===
+boolean[1] existing
+

@@ -1,0 +1,62 @@
+Dependencies
+===========
+Python >= 2.5
+Postgresql >= 8.3
+psycopg2
+simplejson
+
+
+Installation
+============
+Just create a unix user call2ride. Install the packages from above.
+Now create a db user call2ride and a database called call2ride. The best
+idea will be to edit the pg_hba.conf like this
+
+local   all         call2ride                         ident sameuser
+
+this will give the call2ride unix user the permission to access the 
+call2ride database over unix socket connection.
+
+After that just make a simlink from the init script init-script.sh to the
+/etc/init.d/ dir eg.:
+
+ln -s /home/call2ride/src/init-script.sh /etc/init.d/call2ride_jsonrpc
+
+with 
+
+update-rc.d call2ride_jsonrpc default
+
+the webservice will be started automatically, if system is started...
+ensure that the init script have execution permissions.
+
+File struckture
+===============
+
+|-- README  ##this file
+|-- call2ride  ## python module dir
+|   |-- __init__.py  ##nothing spezial
+|   |-- c2r_test.py           ##for testing purposes
+|   |-- interface.py          ##main functionallety
+|   |-- jsonrpc_webservice.py ##module to start jsonrpc webservice
+|   |-- simple_json_rpc.py    ##jsonrpc client and server impl
+|   |-- sms_dummy.py          ##dummy sms module for testing purposes
+|   |-- sms_trade_de.py       ##sms module for smstrade.de
+|   `-- unix_daemon.py        ##util functions for running webservice as deamon
+|-- init-script.sh   ##init script for debian
+|-- schema.sql       ##sql schema
+`-- webservice_interface.txt  ##description of webservices
+
+
+Base Ideas of the implementation
+================================
+The simple_json_rpc module gives us the possibillity to expose all functions
+of a class to a webservice. So I implemented all functionallity of the
+webservice in the call2ride.interface module.
+Most sql-statements are as class members, which should increase maintaince...
+
+
+Know issues
+===========
+
+Todos
+=====

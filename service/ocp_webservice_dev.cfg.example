@@ -1,0 +1,19 @@
+[main]
+type = dev
+webservice_port = 8001
+pidfile = /home/opencarpool/dev_jsonrpc_webservice.pid
+logfile = /home/opencarpool/dev_webservice.log
+
+[database]
+connection = dbname=opencarpool user=postgres password=postgres host=localhost
+
+[sms]
+key = your sms key
+
+[mail]
+smtp = smtp.server.com
+user = username
+password = password
+
+[logging]
+file = /home/opencarpool/dev_jsonrpc_webservice.log

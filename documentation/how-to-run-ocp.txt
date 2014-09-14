@@ -1,0 +1,253 @@
+==============
+DATABASE SETUP
+==============
+
+Original SQL setup script was apparently a dump of the production DB, to fix this I did the following:
+
+In SQL script, changed
+* dev_call2ride → opencarpool
+* call2ride → opencarpool
+
+To create database, in psql client:
+
+# create database opencarpool;
+# create user opencarpool with password '';
+# grant all privileges on database opencarpool to opencarpool;
+# create user web with password '';
+# grant all privileges on database opencarpool to web;
+
+Then import SQL as described in the setup doc:
+
+$ sudo su postgres
+$ psql opencarpool < /home/opencarpool/dev.opencarpool.org/opencarpool.sql
+
+
+==========
+START/STOP
+==========
+
+start/stop/restart apache:
+
+$ sudo service apache2 start
+$ sudo service apache2 stop
+$ sudo service apache2 restart
+
+
+start postgres:
+
+$ sudo service postgresql start
+
+
+start/stop pyhton backend
+
+$ sudo /home/opencarpool/dev.opencarpool.org/service/init-script.sh start
+$ sudo /home/opencarpool/dev.opencarpool.org/service/init-script.sh stop
+
+
+start Cloud9 (note: IDE, only used for the hackathon on a special hackathon server):
+
+$ cd /opt/cloud9/bin
+$ ./cloud9.sh -l 0.0.0.0 -w /home/path
+
+
+===========
+SQL QUERIES
+===========
+
+use postgres client:
+
+$ sudo su postgres
+$ psql opencarpool
+
+
+set password of user to "YOUR_PASSWORD"
+
+# update users set password='YOUR_PASSWORD' where id={USER_ID};
+
+
+set user's phone number to dummy value:
+
+# update user_number set number='+1234567890' where user_id={USER_ID};
+
+
+show tables:
+
+# SELECT * FROM pg_catalog.pg_tables;
+
+
+exit:
+
+# \q
+
+
+====
+LOGS
+====
+
+tail on show apache log:
+
+$ tail -f /var/log/apache2/error.log | grep FOO
+
+
+python backend log:
+
+$ less /home/opencarpool/dev_jsonrpc_webservice.log
+$ less /home/opencarpool/dev_webservice.log
+
+
+====
+MISC
+====
+
+edit php config:
+
+$ sudo vi /etc/php5/apache2/php.ini
+
+
+============================================
+SETTING UP TESTSERVER RUNNING IN VIRTUAL BOX
+============================================
+
+1) Download & install Virtual Box
+
+https://www.virtualbox.org/wiki/Downloads
+
+2) Download ubuntu 10.04.4
+
+http://releases.ubuntu.com/10.04.4/ubuntu-10.04.4-server-amd64.iso
+
+3) Install Ubuntu in Virtual Box
+Add a new box,
+Name: ANY NAME
+Typ: linux
+Version: ubuntu 64 bit
+Rest: standard
+start and select iso image as CD
+
+Ubuntu installation:
+language: english
+language: english
+location: united states
+hostname: opencarpool
+Fullname: OpenCarpool
+Username: opencarpool
+Password: opencarpool (or chose a better pw)
+Software: OpenSSH, LAMP, Postgres
+
+Installation done
+
+Virtual Box->Network->Host Only Networks->add
+=> creates new host only network vboxnet0
+
+Virtual Box WM->Devices->Network Settings->Adapter 1
+- Attached to Host-only Adapter
+- Name: vboxnet0
+- Advanced:
+	- Promiscuous mode: Allow all
+	- Cable connected
+	
+Reboot
+---------
+> ifoncfig
+=> remember IP Adress
+
+Mac:
+> sudo vi /etc/hosts
+Enter:
+YOUR_IP_NUMBER dev.opencarpool.org
+
+
+Virtual Box->Change->Shared Folders->New-> 
+Pfad: Basic Directory on Mac
+Name: dev.opencarpool.org
+automatically integrate/permanently create
+
+in base directory on mac:
+cd website
+mkdir tmp
+chmod 777 tmp
+cd tmp
+mkdir templates_c
+chmod 777 templates_c
+
+
+Ubuntu:
+> sudo apt-get install dkms
+> sudo reboot
+
+> sudo mkdir /media/cdrom
+Virtual Box VM: Devices-> insert guest Additions CD
+> sudo mount -t iso9660 /dev/sr0 /media/cdrom
+> cd /media/cdrom/
+> sudo ./VboxLinuxAdditions.run
+> cd
+> mkdir dev.opencarpool.org
+
+> sudo mount -t vboxsf dev.opencarpool.org  dev.opencarpool.org
+=> add this to the .bashrc if you don't want to enter this every time you start the virtual box
+
+> sudo vi /etc/apache2/sites-enabled/000-default
+=> DocumentRoot /home/opencarpool/dev.opencarpool.org/website/web
+> sudo service apache2 restart
+> sudo chmod a+r /home/opencarpool/dev.opencarpool.org/opencarpool.sql
+> sudo su postgres
+> psql
+# \password postgres
+
+=> postgres / postgres (or better password)
+
+# create database opencarpool;
+# create user opencarpool with password '';
+# grant all privileges on database opencarpool to opencarpool;
+# create user web with password '';
+# grant all privileges on database opencarpool to web;
+
+# \q
+
+> psql opencarpool < /home/opencarpool/dev.opencarpool.org/opencarpool.sql
+> exit
+> sudo vi /etc/postgresql/8.4/main/pg_hba.conf
+=>local   all         postgres                          ident
+=>local   all         postgres                          md5
+> sudo service postgresql-8.4 restart
+> sudo apt-get install php5-pgsql
+> sudo service apache2 restart
+> cd /home/opencarpool/dev.opencarpool.org/service/
+> sudo apt-get install python-psycopg2
+> sudo apt-get install python-setuptools
+> sudo easy_install --upgrade pytz
+
+> chmod a+x init.script.sh
+> chmod a+x src/jsonrpc_webservice
+
+> ./init-script.sh start
+
+=> Done
+http://dev.opencarpool.org
+
+
+======================
+REGISTERING A NEW USER
+======================
+
+If you can't get the vbox server to send out text messages and emails (I know I didn't :-), after registering a new user on the 
+website, check the apache log:
+
+> less /var/log/apache2/error.log
+
+look for these lines:
+
+[Sat Feb 22 21:44:26 2014] [error] [client 192.168.56.1] PHP Warning:  file_get_contents(https://gateway.smstrade.de?key=Zh9N8uKfdaf100c9kUqnxzN&to=+4
+915152661684&route=gold&ref=OpenCarPool&concat_sms=1&cost=1&message_id=1&from=OpenCarPool&charset=UTF-8&message=The+registration+code+is%3A93069): fai
+led to open stream: php_network_getaddresses: getaddrinfo failed: Temporary failure in name resolution in /home/opencarpool/dev.opencarpool.org/websit
+e/functions/functions.php on line 1187, referer: http://dev.opencarpool.org/register.php
+
+=> the registration code the user should have gotten by text message is 93069
+
+[Sat Feb 22 21:44:26 2014] [error] [client 192.168.56.1] [FOO] sending registration mail: This is the Open CarPool registration confirmation mail for
+Patrick Hund. Please enter the confirmation code we sent to your mobile phone into this form: http://dev.opencarpool.org/register.php?code=50c9fe78. T
+his is to assure that both your email address and phone number are valid.\n\n, referer: http://dev.opencarpool.org/register.php
+sh: /usr/sbin/sendmail: not found
+
+=> the URL to go to in your browser to enter reg code is http://dev.opencarpool.org/register.php?code=50c9fe78
+
